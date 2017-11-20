@@ -1,6 +1,6 @@
 {
 	"name": "cli",
-	"description": "A library for parsing POSIX, GNU, and MS-DOS command-line options.",
+	"description": "Parsing POSIX, GNU, and MS-DOS command-line options",
 	"authors": [ "Jonathan M. Wilbur" ],
 	"license": "MIT",
 	"targetType": "library"
