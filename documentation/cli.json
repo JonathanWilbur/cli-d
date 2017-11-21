@@ -1,0 +1,494 @@
+[
+ {
+  "name" : "cli",
+  "kind" : "module",
+  "file" : "./source/cli.d",
+  "comment" : "    A module for parsing command line options and arguments, providing both\n    POSIX-compliant parsers and Windows-style parsers. It is very simple in\n    that it merely maps command-line options to callbacks, and\n\n    It provides the following classes that give you the ability to parse\n    command-line options in different ways:\n\n    $(UL\n        $(LI MSDOSCLIParser (For commands of the form \"command /s /f:file.txt ...\"))\n        $(LI POSIXCLIParser (For commands of the form \"command -sv -f file.txt ...\"))\n        $(LI GNUCLIParser (For commands of the form \"command -sv --long-opt -f file.txt ...\"))\n    )\n\n    $(LINK2 https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html,\n        Program Argument Syntax Conventions) says the following:\n\n    $(I\n        An option and its argument may or may not appear as separate tokens.\n        (In other words, the whitespace separating them is optional.) Thus,\n        ‘-o foo’ and ‘-ofoo’ are equivalent.\n    )\n\n    But because of the ambiguities that introduces, this library will treat all\n    groups of multiple characters preceded by a single dash '-' as several\n    bundled options, rather than one option followed by an argument with no\n    space between them. In other words $(D ./foo -bbaz) will be equivalent to\n    $(D ./foo -b -b -a -z), not $(D ./foo -b baz).\n\n    If an option is not supplied with an argument, the associated callback is\n    executed with the second parameter, $(D argument), set to an empty string.\n    It is on the developer to handle the absence of an argument within the\n    callback if one is expected for a given option.\n\n    Author:\n        $(LINK2 http://jonathan.wilbur.space, Jonathan M. Wilbur)\n            $(LINK2 mailto:jonathan@wilbur.space, jonathan@wilbur.space)\n    Version: 1.0.0\n    Date: November 21st, 2017\n    License: $(https://mit-license.org/, MIT License)\n    Standards:\n        $(LINK2 https://standards.ieee.org/findstds/standard/1003.1-2008.html, POSIX)\n    See_Also:\n        $(LINK2 https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html, Program Argument Syntax Conventions)\n    Examples:\n    ---\n    void testeroni (string value)\n    {\n        import std.stdio : writeln;\n        writeln(\"Made it here with value: \", value);\n    }\n\n    void main(string[] args)\n    {\n        // executable -b\n        // POSIXCLIParser cli = new POSIXCLIParser(\n        //     CLIOption(\"b\", &testeroni)\n        // );\n\n        // executable -b --blap argument\n        // GNUCLIParser cli = new GNUCLIParser(\n        //     CLIOption(\"blap\", &testeroni),\n        //     CLIOption(\"b\", &testeroni)\n        // );\n\n        // executable /blap:argument\n        MSDOSCLIParser cli = new MSDOSCLIParser(\n            CLIOption(\"blap\", &testeroni)\n        );\n\n        cli.parse(args[1 .. $]);\n    }\n\n    ---\n",
+  "members" : [
+   {
+    "name" : "std.ascii",
+    "kind" : "import",
+    "line" : 77,
+    "char" : 8,
+    "protection" : "private",
+    "selective" : [
+     "isAlphaNum",
+     "isGraphical"
+    ]
+   },
+   {
+    "name" : "std.stdio",
+    "kind" : "import",
+    "line" : 78,
+    "char" : 8,
+    "protection" : "private",
+    "selective" : [
+     "writeln"
+    ]
+   },
+   {
+    "name" : "CLIException",
+    "kind" : "alias",
+    "comment" : "\n",
+    "line" : 89,
+    "char" : 8,
+    "deco" : "C3cli29CommandLineInterfaceException"
+   },
+   {
+    "name" : "CommandLineInterfaceException",
+    "kind" : "class",
+    "comment" : "An exception that gets thrown if a command-line option is not recognized\n",
+    "line" : 92,
+    "char" : 1,
+    "base" : "object.Exception",
+    "members" : [
+     {
+      "name" : "std.exception",
+      "kind" : "import",
+      "line" : 94,
+      "char" : 12,
+      "protection" : "private",
+      "selective" : [
+       "basicExceptionCtors"
+      ]
+     },
+     {
+      "name" : "basicExceptionCtors!()",
+      "kind" : "mixin",
+      "line" : 95,
+      "char" : 5
+     }
+    ]
+   },
+   {
+    "name" : "CLIOption",
+    "kind" : "alias",
+    "comment" : "\n",
+    "line" : 99,
+    "char" : 8,
+    "deco" : "S3cli26CommandLineInterfaceOption"
+   },
+   {
+    "name" : "CommandLineInterfaceOption",
+    "kind" : "struct",
+    "comment" : "A mapping between a command-line option and a callback\n",
+    "line" : 102,
+    "char" : 1,
+    "members" : [
+     {
+      "name" : "token",
+      "kind" : "variable",
+      "line" : 104,
+      "char" : 29,
+      "storageClass" : [
+       "immutable"
+      ],
+      "deco" : "yAa",
+      "originalType" : "string",
+      "offset" : 0
+     },
+     {
+      "name" : "callback",
+      "kind" : "variable",
+      "line" : 105,
+      "char" : 45,
+      "storageClass" : [
+       "immutable"
+      ],
+      "deco" : "yDFAyaZv",
+      "originalType" : "void delegate(string)",
+      "offset" : 16
+     },
+     {
+      "name" : "this",
+      "kind" : "constructor",
+      "comment" : "Constructor that accepts a delegate\n",
+      "line" : 109,
+      "char" : 5,
+      "deco" : "FNbNcNfxAyaxDFAyaZvZS3cli26CommandLineInterfaceOption",
+      "originalType" : "nothrow ref @safe (in string token, in void delegate(string) callback)",
+      "parameters" : [
+       {
+        "name" : "token",
+        "deco" : "xAya"
+       },
+       {
+        "name" : "callback",
+        "deco" : "xDFAyaZv"
+       }
+      ],
+      "endline" : 113,
+      "endchar" : 5
+     },
+     {
+      "name" : "this",
+      "kind" : "constructor",
+      "comment" : "Constructor that accepts a function\n",
+      "line" : 117,
+      "char" : 5,
+      "deco" : "FNbNcxAyaxPFAyaZvZS3cli26CommandLineInterfaceOption",
+      "originalType" : "nothrow ref @system (in string token, in void function(string) callback)",
+      "parameters" : [
+       {
+        "name" : "token",
+        "deco" : "xAya"
+       },
+       {
+        "name" : "callback",
+        "deco" : "xPFAyaZv"
+       }
+      ],
+      "endline" : 122,
+      "endchar" : 5
+     }
+    ]
+   },
+   {
+    "name" : "CLIParser",
+    "kind" : "alias",
+    "comment" : "\n",
+    "line" : 126,
+    "char" : 8,
+    "deco" : "C3cli26CommandLineInterfaceParser"
+   },
+   {
+    "name" : "CommandLineInterfaceParser",
+    "kind" : "class",
+    "comment" : "An abstract class from which all command-line parsers will inherit\n",
+    "line" : 129,
+    "char" : 1,
+    "members" : [
+     {
+      "name" : "permitUnrecognizedOptions",
+      "kind" : "variable",
+      "line" : 135,
+      "char" : 17,
+      "deco" : "b",
+      "init" : "false",
+      "offset" : 16
+     },
+     {
+      "name" : "recognizedOptions",
+      "kind" : "variable",
+      "comment" : "The list of options that will be recognized by this CLI parser\n",
+      "line" : 138,
+      "char" : 30,
+      "storageClass" : [
+       "const"
+      ],
+      "deco" : "xAS3cli26CommandLineInterfaceOption",
+      "originalType" : "CLIOption[]",
+      "offset" : 24
+     },
+     {
+      "name" : "parse",
+      "kind" : "function",
+      "line" : 145,
+      "char" : 10,
+      "storageClass" : [
+       "abstract"
+      ],
+      "deco" : "xFxAAyaXv",
+      "originalType" : "const void(in string[] tokens...)",
+      "parameters" : [
+       {
+        "name" : "tokens",
+        "deco" : "xAAya"
+       }
+      ]
+     },
+     {
+      "name" : "this",
+      "kind" : "constructor",
+      "comment" : "Constructor that accepts the list of options to parse\n",
+      "line" : 149,
+      "char" : 5,
+      "deco" : "FNbNfAS3cli26CommandLineInterfaceOptionXC3cli26CommandLineInterfaceParser",
+      "originalType" : "nothrow @safe (CLIOption[] options...)",
+      "parameters" : [
+       {
+        "name" : "options",
+        "deco" : "AS3cli26CommandLineInterfaceOption"
+       }
+      ],
+      "endline" : 152,
+      "endchar" : 5
+     },
+     {
+      "name" : "executeCallbacksAssociatedWith",
+      "kind" : "function",
+      "protection" : "private",
+      "line" : 161,
+      "char" : 10,
+      "deco" : "xFxAyaxAyaZv",
+      "originalType" : "const @system void(in string option, in string value)",
+      "parameters" : [
+       {
+        "name" : "option",
+        "deco" : "xAya"
+       },
+       {
+        "name" : "value",
+        "deco" : "xAya"
+       }
+      ],
+      "endline" : 176,
+      "endchar" : 5
+     }
+    ]
+   },
+   {
+    "name" : "POSIXCLIParser",
+    "kind" : "alias",
+    "comment" : "\n",
+    "line" : 180,
+    "char" : 8,
+    "deco" : "C3cli58PortableOperatingSystemInterfaceCommandLineInterfaceParser"
+   },
+   {
+    "name" : "POSIXCommandLineInterfaceParser",
+    "kind" : "alias",
+    "comment" : "\n",
+    "line" : 183,
+    "char" : 8,
+    "deco" : "C3cli58PortableOperatingSystemInterfaceCommandLineInterfaceParser"
+   },
+   {
+    "name" : "PortableOperatingSystemInterfaceCLIParser",
+    "kind" : "alias",
+    "comment" : "\n",
+    "line" : 186,
+    "char" : 8,
+    "deco" : "C3cli58PortableOperatingSystemInterfaceCommandLineInterfaceParser"
+   },
+   {
+    "name" : "PortableOperatingSystemInterfaceCommandLineInterfaceParser",
+    "kind" : "class",
+    "comment" : "    A command-line parser that strictly follows POSIX rules for command-line\n    options, meaning that it accepts command-line options in short form, such\n    as $(D -o), but not long form, such as $(D --option). To use long form,\n    use $(D GNUCLIParser).\n",
+    "line" : 195,
+    "char" : 1,
+    "base" : "cli.CommandLineInterfaceParser",
+    "members" : [
+     {
+      "name" : "parse",
+      "kind" : "function",
+      "line" : 202,
+      "char" : 10,
+      "storageClass" : [
+       "override"
+      ],
+      "deco" : "xFxAAyaXv",
+      "originalType" : "const @system void(in string[] tokens...)",
+      "parameters" : [
+       {
+        "name" : "tokens",
+        "deco" : "xAAya"
+       }
+      ],
+      "endline" : 235,
+      "endchar" : 5,
+      "overrides" : [
+       "cli.CommandLineInterfaceParser.parse"
+      ]
+     },
+     {
+      "name" : "this",
+      "kind" : "constructor",
+      "comment" : "Constructor that accepts the list of options to parse\n",
+      "line" : 239,
+      "char" : 5,
+      "deco" : "FNfAS3cli26CommandLineInterfaceOptionXC3cli58PortableOperatingSystemInterfaceCommandLineInterfaceParser",
+      "originalType" : "@safe (CLIOption[] options...)",
+      "parameters" : [
+       {
+        "name" : "options",
+        "deco" : "AS3cli26CommandLineInterfaceOption"
+       }
+      ],
+      "endline" : 252,
+      "endchar" : 5
+     }
+    ]
+   },
+   {
+    "name" : "__unittestL256_1",
+    "kind" : "function",
+    "line" : 256,
+    "char" : 1,
+    "storageClass" : [
+     "@system"
+    ],
+    "endline" : 303,
+    "endchar" : 1
+   },
+   {
+    "name" : "GNUCLIParser",
+    "kind" : "alias",
+    "comment" : "\n",
+    "line" : 303,
+    "char" : 8,
+    "deco" : "C3cli37GnusNotUnixCommandLineInterfaceParser"
+   },
+   {
+    "name" : "GNUCommandLineInterfaceParser",
+    "kind" : "alias",
+    "comment" : "\n",
+    "line" : 305,
+    "char" : 8,
+    "deco" : "C3cli37GnusNotUnixCommandLineInterfaceParser"
+   },
+   {
+    "name" : "GnusNotUnixCLIParser",
+    "kind" : "alias",
+    "comment" : "\n",
+    "line" : 307,
+    "char" : 8,
+    "deco" : "C3cli37GnusNotUnixCommandLineInterfaceParser"
+   },
+   {
+    "name" : "GnusNotUnixCommandLineInterfaceParser",
+    "kind" : "class",
+    "comment" : "    A command-line parser that slightly deviates from the POSIX rules by\n    allowing long-form options, as are common in GNU/Linux executables.\n    The long-form options can be separated from their arguments either by\n    whitespace or by an equal sign.\n",
+    "line" : 315,
+    "char" : 1,
+    "base" : "cli.CommandLineInterfaceParser",
+    "members" : [
+     {
+      "name" : "parse",
+      "kind" : "function",
+      "line" : 322,
+      "char" : 10,
+      "storageClass" : [
+       "override"
+      ],
+      "deco" : "xFxAAyaXv",
+      "originalType" : "const @system void(in string[] tokens...)",
+      "parameters" : [
+       {
+        "name" : "tokens",
+        "deco" : "xAAya"
+       }
+      ],
+      "endline" : 372,
+      "endchar" : 5,
+      "overrides" : [
+       "cli.CommandLineInterfaceParser.parse"
+      ]
+     },
+     {
+      "name" : "this",
+      "kind" : "constructor",
+      "comment" : "Constructor that accepts the list of options to parse\n",
+      "line" : 376,
+      "char" : 5,
+      "deco" : "FNfAS3cli26CommandLineInterfaceOptionXC3cli37GnusNotUnixCommandLineInterfaceParser",
+      "originalType" : "@safe (CLIOption[] options...)",
+      "parameters" : [
+       {
+        "name" : "options",
+        "deco" : "AS3cli26CommandLineInterfaceOption"
+       }
+      ],
+      "endline" : 392,
+      "endchar" : 5
+     }
+    ]
+   },
+   {
+    "name" : "__unittestL396_2",
+    "kind" : "function",
+    "line" : 396,
+    "char" : 1,
+    "storageClass" : [
+     "@system"
+    ],
+    "endline" : 500,
+    "endchar" : 1
+   },
+   {
+    "name" : "MSDOSCLIParser",
+    "kind" : "alias",
+    "comment" : "\n",
+    "line" : 500,
+    "char" : 8,
+    "deco" : "C3cli54MicrosoftDiskOperatingSystemCommandLineInterfaceParser"
+   },
+   {
+    "name" : "MSDOSCommandLineInterfaceParser",
+    "kind" : "alias",
+    "comment" : "\n",
+    "line" : 503,
+    "char" : 8,
+    "deco" : "C3cli54MicrosoftDiskOperatingSystemCommandLineInterfaceParser"
+   },
+   {
+    "name" : "MicrosoftDiskOperatingSystemCLIParser",
+    "kind" : "alias",
+    "comment" : "\n",
+    "line" : 506,
+    "char" : 8,
+    "deco" : "C3cli54MicrosoftDiskOperatingSystemCommandLineInterfaceParser"
+   },
+   {
+    "name" : "MicrosoftDiskOperatingSystemCommandLineInterfaceParser",
+    "kind" : "class",
+    "comment" : "\n",
+    "line" : 510,
+    "char" : 1,
+    "base" : "cli.CommandLineInterfaceParser",
+    "members" : [
+     {
+      "name" : "parse",
+      "kind" : "function",
+      "line" : 517,
+      "char" : 10,
+      "storageClass" : [
+       "override"
+      ],
+      "deco" : "xFxAAyaXv",
+      "originalType" : "const @system void(in string[] tokens...)",
+      "parameters" : [
+       {
+        "name" : "tokens",
+        "deco" : "xAAya"
+       }
+      ],
+      "endline" : 557,
+      "endchar" : 5,
+      "overrides" : [
+       "cli.CommandLineInterfaceParser.parse"
+      ]
+     },
+     {
+      "name" : "this",
+      "kind" : "constructor",
+      "comment" : "Constructor that accepts the list of options to parse\n",
+      "line" : 561,
+      "char" : 5,
+      "deco" : "FNfAS3cli26CommandLineInterfaceOptionXC3cli54MicrosoftDiskOperatingSystemCommandLineInterfaceParser",
+      "originalType" : "@safe (CLIOption[] options...)",
+      "parameters" : [
+       {
+        "name" : "options",
+        "deco" : "AS3cli26CommandLineInterfaceOption"
+       }
+      ],
+      "endline" : 577,
+      "endchar" : 5
+     }
+    ]
+   },
+   {
+    "name" : "__unittestL581_3",
+    "kind" : "function",
+    "line" : 581,
+    "char" : 1,
+    "storageClass" : [
+     "@system"
+    ],
+    "endline" : 649,
+    "endchar" : 2
+   }
+  ]
+ }
+]
